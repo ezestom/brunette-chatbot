@@ -1,6 +1,12 @@
 import { NextResponse } from "next/server";
 
 export async function GET() {
+	interface GeminiModel {
+		name: string;
+		displayName: string;
+		supportedGenerationMethods?: string[];
+	}
+
 	try {
 		console.log("=== TEST ENDPOINT - Listando modelos disponibles ===");
 		console.log("API Key presente:", !!process.env.GEMINI_API_KEY);
@@ -20,7 +26,7 @@ export async function GET() {
 
 		if (listResponse.ok) {
 			const listData = JSON.parse(listText);
-			const availableModels = listData.models?.map((m: any) => ({
+			const availableModels = listData.models?.map((m: GeminiModel) => ({
 				name: m.name,
 				displayName: m.displayName,
 				supportedMethods: m.supportedGenerationMethods,
