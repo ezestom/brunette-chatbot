@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 
+
 interface Product {
   id: string;
   name: string;
@@ -40,65 +41,81 @@ export default function Home() {
   const [voiceError, setVoiceError] = useState<string>('');
   const [isOpen, setIsOpen] = useState(false); // Estado del widget (abierto/cerrado)
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Inicializar reconocimiento de voz
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const windowWithSpeech = window as Window & typeof globalThis & {
-      SpeechRecognition?: new () => SpeechRecognitionType;
-      webkitSpeechRecognition?: new () => SpeechRecognitionType;
+        SpeechRecognition?: new () => SpeechRecognitionType;
+        webkitSpeechRecognition?: new () => SpeechRecognitionType;
       };
-      
+
       const SpeechRecognition = windowWithSpeech.SpeechRecognition || windowWithSpeech.webkitSpeechRecognition;
-      
+
       if (SpeechRecognition) {
-      const recognitionInstance = new SpeechRecognition();
-      recognitionInstance.continuous = false;
-      recognitionInstance.interimResults = false;
-      recognitionInstance.lang = 'es-ES';
-      recognitionInstance.maxAlternatives = 1;
+        const recognitionInstance = new SpeechRecognition();
+        recognitionInstance.continuous = false;
+        recognitionInstance.interimResults = false;
+        recognitionInstance.lang = 'es-ES';
+        recognitionInstance.maxAlternatives = 1;
 
-      recognitionInstance.onstart = () => {
-        console.log('Reconocimiento de voz iniciado');
-      };
+        recognitionInstance.onstart = () => {
+          console.log('Reconocimiento de voz iniciado');
+        };
 
-      recognitionInstance.onresult = (event: SpeechRecognitionEvent) => {
-        const transcript = event.results[0][0].transcript;
-        setMessage(transcript);
-        setVoiceError('');
-      };
+        recognitionInstance.onresult = (event) => {
+          const transcript = event.results[0][0].transcript;
+          setMessage(transcript);
+          setVoiceError('');
+        };
 
-      recognitionInstance.onerror = (event: { error: string }) => {
-        console.error('Error de reconocimiento:', event.error);
-        setIsRecording(false);
+        recognitionInstance.onerror = (event: { error: string }) => {
+          console.error('Error de reconocimiento:', event.error);
+          setIsRecording(false);
 
-        // Mostrar mensaje de error más específico
-        if (event.error === 'network') {
-        setVoiceError('Error de conexión. Verifica tu internet e intenta de nuevo.');
-        // No mostrar alert, solo log
-        console.warn('⚠️ Error de red al conectar con el servicio de reconocimiento de voz de Google.');
-        console.warn('💡 Asegúrate de tener conexión a internet estable.');
-        } else if (event.error === 'no-speech') {
-        setVoiceError('No se detectó voz. Intenta de nuevo hablando más cerca del micrófono.');
-        } else if (event.error === 'not-allowed') {
-        setVoiceError('Debes permitir el acceso al micrófono.');
-        alert('Por favor, permite el acceso al micrófono en tu navegador para usar esta función.');
-        } else if (event.error === 'aborted') {
-        setVoiceError('');
-        } else {
-        setVoiceError(`Error: ${event.error}`);
-        }
-      };
+          // Mostrar mensaje de error más específico
+          if (event.error === 'network') {
+            setVoiceError('Error de conexión. Verifica tu internet e intenta de nuevo.');
+            // No mostrar alert, solo log
+            console.warn('⚠️ Error de red al conectar con el servicio de reconocimiento de voz de Google.');
+            console.warn('💡 Asegúrate de tener conexión a internet estable.');
+          } else if (event.error === 'no-speech') {
+            setVoiceError('No se detectó voz. Intenta de nuevo hablando más cerca del micrófono.');
+          } else if (event.error === 'not-allowed') {
+            setVoiceError('Debes permitir el acceso al micrófono.');
+            alert('Por favor, permite el acceso al micrófono en tu navegador para usar esta función.');
+          } else if (event.error === 'aborted') {
+            setVoiceError('');
+          } else {
+            setVoiceError(`Error: ${event.error}`);
+          }
+        };
 
-      recognitionInstance.onend = () => {
-        console.log('Reconocimiento de voz finalizado');
-        setIsRecording(false);
-      };
+        recognitionInstance.onend = () => {
+          console.log('Reconocimiento de voz finalizado');
+          setIsRecording(false);
+        };
 
-      setRecognition(recognitionInstance);
+        setRecognition(recognitionInstance);
       }
     }
-    }, []);
+  }, []);
+
+  // Cerrar el chatbot con la tecla ESC
+  useEffect(() => {
+    const handleEscKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isOpen) {
+        setIsOpen(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleEscKey);
+
+    return () => {
+      window.removeEventListener('keydown', handleEscKey);
+    };
+  }, [isOpen]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -163,6 +180,10 @@ export default function Home() {
       setMessages((prev) => [...prev, { role: 'assistant', content: 'Error al procesar tu mensaje.' }]);
     } finally {
       setIsLoading(false);
+      // Mantener el foco en el input después de enviar
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
     }
   };
 
@@ -311,6 +332,7 @@ export default function Home() {
               <form onSubmit={handleSubmit}>
                 <div className="flex items-end gap-1.5 sm:gap-2 rounded-full sm:rounded-3xl border" style={{ borderColor: 'var(--gemini-border)', background: 'var(--gemini-bg)' }}>
                   <input
+                    ref={inputRef}
                     type="text"
                     value={message}
                     onChange={(e) => {
