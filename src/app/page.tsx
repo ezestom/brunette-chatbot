@@ -22,7 +22,7 @@ type SpeechRecognitionType = {
   start: () => void;
   stop: () => void;
   onstart?: () => void;
-  onresult?: (event: SpeechRecognitionEvent) => void;
+  onresult?: (event: SpeechRecognitionType) => void;
   onerror?: (event: { error: string }) => void;
   onend?: () => void;
   continuous: boolean;
@@ -97,7 +97,8 @@ export default function Home() {
           setIsRecording(false);
         };
 
-        setRecognition(recognitionInstance);
+        // setRecognition(recognitionInstance);
+        
       }
     }
   }, []);
