@@ -17,13 +17,26 @@ interface Message {
   content: string;
   images?: Product[];
 }
+type SpeechRecognitionType = {
+  start: () => void;
+  stop: () => void;
+  onstart?: () => void;
+  onresult?: (event: SpeechRecognitionEvent) => void;
+  onerror?: (event: { error: string }) => void;
+  onend?: () => void;
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  maxAlternatives: number;
+};
+
 
 export default function Home() {
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
-  const [recognition, setRecognition] = useState<any>(null);
+  const [recognition, setRecognition] = useState<SpeechRecognitionType | null>(null);
   const [voiceError, setVoiceError] = useState<string>('');
   const [isOpen, setIsOpen] = useState(false); // Estado del widget (abierto/cerrado)
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -31,56 +44,61 @@ export default function Home() {
   // Inicializar reconocimiento de voz
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      const windowWithSpeech = window as Window & typeof globalThis & {
+      SpeechRecognition?: new () => SpeechRecognitionType;
+      webkitSpeechRecognition?: new () => SpeechRecognitionType;
+      };
+      
+      const SpeechRecognition = windowWithSpeech.SpeechRecognition || windowWithSpeech.webkitSpeechRecognition;
+      
       if (SpeechRecognition) {
-        const recognitionInstance = new SpeechRecognition();
-        recognitionInstance.continuous = false;
-        recognitionInstance.interimResults = false;
-        recognitionInstance.lang = 'es-ES';
-        recognitionInstance.maxAlternatives = 1;
+      const recognitionInstance = new SpeechRecognition();
+      recognitionInstance.continuous = false;
+      recognitionInstance.interimResults = false;
+      recognitionInstance.lang = 'es-ES';
+      recognitionInstance.maxAlternatives = 1;
 
-        recognitionInstance.onstart = () => {
-          console.log('Reconocimiento de voz iniciado');
-        };
+      recognitionInstance.onstart = () => {
+        console.log('Reconocimiento de voz iniciado');
+      };
 
-        recognitionInstance.onresult = (event: any) => {
-          const transcript = event.results[0][0].transcript;
-          console.log('Transcripción:', transcript);
-          setMessage(transcript);
-          setVoiceError(''); // Limpiar error si hay éxito
-        };
+      recognitionInstance.onresult = (event: SpeechRecognitionEvent) => {
+        const transcript = event.results[0][0].transcript;
+        setMessage(transcript);
+        setVoiceError('');
+      };
 
-        recognitionInstance.onerror = (event: any) => {
-          console.error('Error de reconocimiento:', event.error);
-          setIsRecording(false);
+      recognitionInstance.onerror = (event: { error: string }) => {
+        console.error('Error de reconocimiento:', event.error);
+        setIsRecording(false);
 
-          // Mostrar mensaje de error más específico
-          if (event.error === 'network') {
-            setVoiceError('Error de conexión. Verifica tu internet e intenta de nuevo.');
-            // No mostrar alert, solo log
-            console.warn('⚠️ Error de red al conectar con el servicio de reconocimiento de voz de Google.');
-            console.warn('💡 Asegúrate de tener conexión a internet estable.');
-          } else if (event.error === 'no-speech') {
-            setVoiceError('No se detectó voz. Intenta de nuevo hablando más cerca del micrófono.');
-          } else if (event.error === 'not-allowed') {
-            setVoiceError('Debes permitir el acceso al micrófono.');
-            alert('Por favor, permite el acceso al micrófono en tu navegador para usar esta función.');
-          } else if (event.error === 'aborted') {
-            setVoiceError('');
-          } else {
-            setVoiceError(`Error: ${event.error}`);
-          }
-        };
+        // Mostrar mensaje de error más específico
+        if (event.error === 'network') {
+        setVoiceError('Error de conexión. Verifica tu internet e intenta de nuevo.');
+        // No mostrar alert, solo log
+        console.warn('⚠️ Error de red al conectar con el servicio de reconocimiento de voz de Google.');
+        console.warn('💡 Asegúrate de tener conexión a internet estable.');
+        } else if (event.error === 'no-speech') {
+        setVoiceError('No se detectó voz. Intenta de nuevo hablando más cerca del micrófono.');
+        } else if (event.error === 'not-allowed') {
+        setVoiceError('Debes permitir el acceso al micrófono.');
+        alert('Por favor, permite el acceso al micrófono en tu navegador para usar esta función.');
+        } else if (event.error === 'aborted') {
+        setVoiceError('');
+        } else {
+        setVoiceError(`Error: ${event.error}`);
+        }
+      };
 
-        recognitionInstance.onend = () => {
-          console.log('Reconocimiento de voz finalizado');
-          setIsRecording(false);
-        };
+      recognitionInstance.onend = () => {
+        console.log('Reconocimiento de voz finalizado');
+        setIsRecording(false);
+      };
 
-        setRecognition(recognitionInstance);
+      setRecognition(recognitionInstance);
       }
     }
-  }, []);
+    }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -166,7 +184,7 @@ export default function Home() {
       {/* Botón flotante para abrir/cerrar el chat */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 w-14 h-14 sm:w-16 sm:h-16 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 z-50"
+        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 w-14 h-14 sm:w-16 sm:h-16 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 z-50 hover:cursor-pointer"
         style={{
           background: 'linear-gradient(135deg, #8e24aa 0%, #d81b60 100%)',
           transform: isOpen ? 'scale(0)' : 'scale(1)',
