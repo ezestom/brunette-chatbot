@@ -63,8 +63,8 @@ export async function POST(req: NextRequest) {
 		console.log("📦 Contenido preparado:", contents.length, "mensajes");
 		console.log("📤 Enviando request a Gemini API v1...");
 
-		// Usar Gemini 2.5 Flash (el más moderno y disponible con tu API key)
-		const modelName = "gemini-2.5-flash";
+		// Usar Gemini 1.5 Flash 8B (el más económico y estable)
+		const modelName = "gemini-1.5-flash-8b";
 		console.log("🤖 Usando modelo:", modelName);
 		// IMPORTANTE: Usar v1beta porque es donde están disponibles los modelos
 		const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${process.env.GEMINI_API_KEY}`;
