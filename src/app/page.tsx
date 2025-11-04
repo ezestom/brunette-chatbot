@@ -43,6 +43,31 @@ export default function Home() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Función para convertir URLs en enlaces clickables
+  const renderMessageWithLinks = (content: string) => {
+    // Regex para detectar URLs (http, https, wa.me, etc.)
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const parts = content.split(urlRegex);
+    
+    return parts.map((part, index) => {
+      if (part.match(urlRegex)) {
+        return (
+          <a
+            key={index}
+            href={part}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-500 hover:text-blue-700 underline break-all"
+            style={{ color: '#2563eb', textDecoration: 'underline' }}
+          >
+            {part}
+          </a>
+        );
+      }
+      return part;
+    });
+  };
+
   // Inicializar reconocimiento de voz
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -92,13 +117,12 @@ export default function Home() {
           }
         };
 
-        recognitionInstance.onend = () => {
-          console.log('Reconocimiento de voz finalizado');
-          setIsRecording(false);
-        };
+        // recognitionInstance.onend = () => {
+        //   console.log('Reconocimiento de voz finalizado');
+        //   setIsRecording(false);
+        // };
 
         // setRecognition(recognitionInstance);
-        
       }
     }
   }, []);
@@ -268,7 +292,9 @@ export default function Home() {
                     </div>
                     <div className="flex-1 pt-0.5 sm:pt-1 min-w-0">
                       <div className="text-xs font-medium mb-1" style={{ color: 'var(--gemini-text-secondary)' }}>{msg.role === 'user' ? 'Tú' : 'Brunette'}</div>
-                      <p className="whitespace-pre-wrap leading-relaxed text-sm break-words" style={{ color: 'var(--gemini-text)' }}>{msg.content}</p>
+                      <div className="whitespace-pre-wrap leading-relaxed text-sm break-words" style={{ color: 'var(--gemini-text)' }}>
+                        {renderMessageWithLinks(msg.content)}
+                      </div>
 
                       {/* Mostrar galería de productos si existen */}
                       {msg.images && msg.images.length > 0 && (
