@@ -325,7 +325,9 @@ export default function Home() {
               <div className="flex flex-col items-center justify-center h-full px-4">
                 <div className="mb-3 sm:mb-4 text-5xl sm:text-6xl">🧁</div>
                 <h2 className="text-xl sm:text-2xl font-normal mb-2 text-center" style={{ color: 'var(--gemini-text)' }}>¿En qué puedo ayudarte?</h2>
-                <p className="text-sm text-center" style={{ color: 'var(--gemini-text-secondary)' }}>Te puedo ayudar a encontrar los mejores productos para ti.</p>
+                <p className="text-sm text-center" style={{ color: 'var(--gemini-text-secondary)' }}>
+                  Te puedo acompañar a descubrir nuestros deliciosos productos de pastelería artesanal. Pregúntame sobre nuestros dulces, precios, horarios o cómo hacer un pedido. ¡Estoy aquí para ayudarte a endulzar tu día! 🍰🎂
+                </p>
               </div>
             ) : (
               <div className="px-3 sm:px-4 py-4 sm:py-6">
