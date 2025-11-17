@@ -33,6 +33,7 @@ body {
 	font-family: var(--font-inter), "Google Sans", "Segoe UI", Roboto,
 		sans-serif;
 	z-index: -20;
+	position: fixed;
 	background: transparent !important;
 	color: var(--gemini-text);
 	margin: 0;
