@@ -151,6 +151,41 @@ export default function Home() {
     }
   }, [isOpen]);
 
+  // Ajustar vista cuando aparece el teclado en móvil
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleResize = () => {
+      // En móvil, cuando el teclado aparece, window.visualViewport cambia
+      if (typeof window !== 'undefined' && window.visualViewport) {
+        const viewport = window.visualViewport;
+        document.documentElement.style.setProperty('--viewport-height', `${viewport.height}px`);
+      }
+    };
+
+    const handleFocus = () => {
+      // Cuando el input recibe foco, hacer scroll para que sea visible
+      setTimeout(() => {
+        inputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 300);
+    };
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', handleResize);
+      window.visualViewport.addEventListener('scroll', handleResize);
+    }
+
+    inputRef.current?.addEventListener('focus', handleFocus);
+
+    return () => {
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', handleResize);
+        window.visualViewport.removeEventListener('scroll', handleResize);
+      }
+      inputRef.current?.removeEventListener('focus', handleFocus);
+    };
+  }, [isOpen]);
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };

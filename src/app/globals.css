@@ -80,18 +80,22 @@ body {
 
 /* Estilos responsivos para el widget de chatbot */
 .chatbot-widget {
-	/* Móvil: Pantalla completa */
+	/* Móvil: Pantalla completa con soporte para teclado virtual */
 	bottom: 0;
 	right: 0;
 	left: 0;
 	top: 0;
 	width: 100%;
-	height: 100%;
+	height: 100dvh; /* Altura dinámica del viewport que se ajusta al teclado */
+	height: var(--viewport-height, 100dvh);
 	transform-origin: bottom right;
 }
 
 .chatbot-container {
 	border-radius: 0;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
 }
 
 /* Desktop: Widget flotante */
@@ -108,6 +112,35 @@ body {
 
 	.chatbot-container {
 		border-radius: 1rem;
+	}
+}
+
+/* Ajustes para móvil cuando el teclado está abierto */
+@media (max-width: 639px) {
+	.chatbot-widget {
+		/* Usar dvh que se ajusta dinámicamente al teclado */
+		min-height: 100dvh;
+		max-height: 100dvh;
+	}
+
+	/* Asegurar que el contenedor principal ocupe todo el espacio */
+	.chatbot-container {
+		min-height: 100dvh;
+		max-height: 100dvh;
+		overflow: hidden;
+	}
+
+	/* El main debe ser flexible */
+	.chatbot-container main {
+		flex: 1;
+		overflow-y: auto;
+		overflow-x: hidden;
+		-webkit-overflow-scrolling: touch;
+	}
+
+	/* El footer debe quedar fijo abajo */
+	.chatbot-container footer {
+		flex-shrink: 0;
 	}
 }
 

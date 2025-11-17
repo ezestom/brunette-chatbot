@@ -11,6 +11,14 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Brunette - Gemini AI",
   description: "Chat con Google Gemini AI",
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+    viewportFit: "cover",
+    interactiveWidget: "resizes-content", // Importante: ajusta el contenido cuando aparece el teclado
+  },
 };
 
 export default function RootLayout({
