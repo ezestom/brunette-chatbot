@@ -48,7 +48,7 @@ export default function Home() {
     // Regex para detectar URLs (http, https, wa.me, etc.)
     const urlRegex = /(https?:\/\/[^\s]+)/g;
     const parts = content.split(urlRegex);
-    
+
     return parts.map((part, index) => {
       if (part.match(urlRegex)) {
         return (
@@ -140,6 +140,15 @@ export default function Home() {
     return () => {
       window.removeEventListener('keydown', handleEscKey);
     };
+  }, [isOpen]);
+
+  // Auto-focus en el input cuando se abre el chat
+  useEffect(() => {
+    if (isOpen) {
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
+    }
   }, [isOpen]);
 
   const scrollToBottom = () => {

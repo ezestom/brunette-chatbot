@@ -32,14 +32,21 @@
 body {
 	font-family: var(--font-inter), "Google Sans", "Segoe UI", Roboto,
 		sans-serif;
-	background: transparent !important;
+	background-image: url("/pasteleria.jpg");
+	background-size: cover;
+	background-position: center;
+	background-repeat: no-repeat;
+	background-attachment: fixed;
+	background-color: rgba(255, 255, 255, 0.85);
+	background-blend-mode: lighten;
+	position: fixed;
+	z-index: -20;
 	color: var(--gemini-text);
 	margin: 0;
 	padding: 0;
 	width: 100vw;
 	height: 100vh;
-  z-index: -20;
-  overflow: hidden;
+	overflow: hidden;
 }
 
 /* Scrollbar personalizado estilo Google */
