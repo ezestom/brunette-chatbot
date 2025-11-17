@@ -12,7 +12,6 @@
 	--gemini-assistant-bg: #f1f3f4;
 	--gemini-primary: #1a73e8;
 	--gemini-hover: #f1f3f4;
-  --general-bg: transparent;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -27,19 +26,20 @@
 		--gemini-assistant-bg: #303134;
 		--gemini-primary: #8ab4f8;
 		--gemini-hover: #3c4043;
-    --general-bg: transparent;
 	}
 }
 
 body {
 	font-family: var(--font-inter), "Google Sans", "Segoe UI", Roboto,
 		sans-serif;
-	z-index: -20;
-	position: fixed;
-  background: var(--general-bg) !important;
+	background: transparent !important;
 	color: var(--gemini-text);
 	margin: 0;
 	padding: 0;
+	width: 100vw;
+	height: 100vh;
+  z-index: -20;
+  overflow: hidden;
 }
 
 /* Scrollbar personalizado estilo Google */
