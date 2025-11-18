@@ -36,7 +36,8 @@ body {
 	background-size: cover;
 	background-position: center;
 	background-repeat: no-repeat;
-	background-attachment: fixed;
+	/* En iOS fixed causa problemas, usar scroll */
+	background-attachment: scroll;
 	background-color: rgba(255, 255, 255, 0.85);
 	background-blend-mode: lighten;
 	position: fixed;
@@ -44,9 +45,12 @@ body {
 	color: var(--gemini-text);
 	margin: 0;
 	padding: 0;
-	width: 100vw;
-	height: 100vh;
+	width: 100%;
+	height: 100%;
 	overflow: hidden;
+	/* Prevenir zoom en iOS */
+	-webkit-text-size-adjust: 100%;
+	touch-action: manipulation;
 }
 
 /* Scrollbar personalizado estilo Google */
@@ -81,21 +85,29 @@ body {
 /* Estilos responsivos para el widget de chatbot */
 .chatbot-widget {
 	/* Móvil: Pantalla completa con soporte para teclado virtual */
+	position: fixed;
 	bottom: 0;
 	right: 0;
 	left: 0;
 	top: 0;
 	width: 100%;
-	height: 100dvh; /* Altura dinámica del viewport que se ajusta al teclado */
-	height: var(--viewport-height, 100dvh);
+	/* iOS Safari: usar vh como fallback, dvh si está disponible */
+	height: 100vh;
+	height: -webkit-fill-available;
+	height: 100dvh;
 	transform-origin: bottom right;
+	/* Prevenir bounce scroll en iOS */
+	overscroll-behavior: none;
+	-webkit-overflow-scrolling: touch;
 }
 
 .chatbot-container {
 	border-radius: 0;
 	height: 100%;
+	min-height: -webkit-fill-available;
 	display: flex;
 	flex-direction: column;
+	position: relative;
 }
 
 /* Desktop: Widget flotante */
@@ -117,34 +129,64 @@ body {
 
 /* Ajustes para móvil cuando el teclado está abierto */
 @media (max-width: 639px) {
+	/* iOS Safari específico */
+	html {
+		height: -webkit-fill-available;
+	}
+
+	body {
+		height: -webkit-fill-available;
+	}
+
 	.chatbot-widget {
-		/* Usar dvh que se ajusta dinámicamente al teclado */
+		/* iOS Safari: altura dinámica */
+		min-height: 100vh;
+		min-height: -webkit-fill-available;
 		min-height: 100dvh;
+		max-height: 100vh;
+		max-height: -webkit-fill-available;
 		max-height: 100dvh;
 	}
 
 	/* Asegurar que el contenedor principal ocupe todo el espacio */
 	.chatbot-container {
+		min-height: 100vh;
+		min-height: -webkit-fill-available;
 		min-height: 100dvh;
+		max-height: 100vh;
+		max-height: -webkit-fill-available;
 		max-height: 100dvh;
 		overflow: hidden;
+		position: relative;
 	}
 
 	/* El main debe ser flexible */
 	.chatbot-container main {
-		flex: 1;
+		flex: 1 1 auto;
 		overflow-y: auto;
 		overflow-x: hidden;
 		-webkit-overflow-scrolling: touch;
+		/* Importante para iOS */
+		position: relative;
+		z-index: 1;
 	}
 
 	/* El footer debe quedar fijo abajo */
 	.chatbot-container footer {
 		flex-shrink: 0;
+		flex-grow: 0;
+		position: relative;
+		z-index: 2;
 	}
-}
 
-/* Soporte para safe area en dispositivos con notch */
+	/* Input específico para iOS */
+	.chatbot-container footer input {
+		/* Prevenir zoom en iOS cuando se hace foco */
+		font-size: 16px;
+		-webkit-appearance: none;
+		border-radius: 0;
+	}
+} /* Soporte para safe area en dispositivos con notch */
 @supports (padding: env(safe-area-inset-bottom)) {
 	.safe-area-bottom {
 		padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
@@ -154,6 +196,7 @@ body {
 /* Utilidad para truncar texto en múltiples líneas */
 .line-clamp-2 {
 	display: -webkit-box;
+	line-clamp: 2;
 	-webkit-line-clamp: 2;
 	-webkit-box-orient: vertical;
 	overflow: hidden;
